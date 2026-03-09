@@ -303,8 +303,10 @@
                     <div
                         class="text-[10px] text-gray-400 truncate mt-0.5 uppercase tracking-wide flex items-center justify-between">
                         <span id="profile-dept">Online</span>
-                        <button onclick="logout()" class="hover:text-red-400 transition-colors cursor-pointer"><i
-                                class="ph-fill ph-sign-out"></i></button>
+                        <button onclick="logout()"
+                            class="hover:text-red-400 transition-colors cursor-pointer ml-3 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 text-red-400 hover:bg-red-500/20 flex items-center gap-1 shadow-sm font-semibold">
+                            <i class="ph-fill ph-sign-out text-[14px]"></i> Logout
+                        </button>
                     </div>
                 </div>
             </div>
@@ -393,10 +395,12 @@
             const session = localStorage.getItem('chatSession');
             if (session) {
                 currentUser = JSON.parse(session);
-                if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
-                    window.location.href = '/admin.html'; // Instructed behavior: Teachers go to admin
+                const teacherIsViewingChat = sessionStorage.getItem('teacherViewingChat') === 'true';
+
+                if ((currentUser.role === 'admin' || currentUser.role === 'teacher') && !teacherIsViewingChat) {
+                    window.location.href = '/admin.html'; // Normal flow: Teacher logs in -> admin
                 } else {
-                    initAppUI();
+                    initAppUI(); // Student, OR Teacher who clicked "Chat App" from dashboard
                 }
             }
         });
@@ -501,6 +505,7 @@
 
         function logout() {
             localStorage.removeItem('chatSession');
+            sessionStorage.removeItem('teacherViewingChat');
             window.location.reload();
         }
 
