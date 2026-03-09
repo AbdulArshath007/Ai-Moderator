@@ -1,15 +1,23 @@
 const { google } = require('googleapis');
 const stream = require('stream');
 const path = require('path');
+const fs = require('fs');
 
 // Reference the JSON key file from the root directory
 const KEYFILEPATH = path.join(__dirname, '../gps-tracker-439417-629a860d6001.json');
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 
-const auth = new google.auth.GoogleAuth({
-    keyFile: KEYFILEPATH,
-    scopes: SCOPES,
-});
+let authConfig = { scopes: SCOPES };
+
+if (fs.existsSync(KEYFILEPATH)) {
+    authConfig.keyFile = KEYFILEPATH;
+} else if (process.env.GOOGLE_CREDENTIALS) {
+    authConfig.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+} else {
+    console.warn("No Google Auth credentials found. Set GOOGLE_CREDENTIALS in your environment.");
+}
+
+const auth = new google.auth.GoogleAuth(authConfig);
 
 // Initialize the Google Drive API service
 const driveService = google.drive({ version: 'v3', auth });
