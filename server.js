@@ -29,6 +29,25 @@ app.use('/api/auth', authRoutes(pool));
 // /api houses all legacy admin functions mapping to the new role structure
 app.use('/api', adminRoutes(pool, io));
 
+// Open Chat APIs
+app.get('/api/chat/messages/:groupId', async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const result = await pool.query(`
+            SELECT m.id, m.content, m.created_at as "createdAt", u.username, u.profile_pic_url as "profilePicUrl", m.user_id as "userId"
+            FROM messages m
+            JOIN users u ON m.user_id = u.id
+            WHERE m.group_id = $1
+            ORDER BY m.created_at ASC
+            LIMIT 50
+        `, [groupId]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error fetching messages' });
+    }
+});
+
 // Socket.io Real-Time Chat & Moderation Logic
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
