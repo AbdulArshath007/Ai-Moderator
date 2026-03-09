@@ -422,7 +422,10 @@
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const errEl = document.getElementById('login-error');
+            const submitBtn = document.querySelector('#login-form button[type="submit"]');
+
             errEl.classList.add('hidden');
+            submitBtn.disabled = true;
 
             try {
                 const res = await fetch(`${API_URL}/login`, {
@@ -440,6 +443,7 @@
             } catch (err) {
                 errEl.textContent = err.message;
                 errEl.classList.remove('hidden');
+                submitBtn.disabled = false;
             }
         });
 
@@ -545,7 +549,12 @@
         // -------------------------
         // SOCKET.IO & CHAT LOGIC
         // -------------------------
+        let isSocketInitialized = false;
+
         function initSocket() {
+            if (isSocketInitialized) return;
+            isSocketInitialized = true;
+
             socket = io();
             const currentGroupId = '1';
 
