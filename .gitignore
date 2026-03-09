@@ -1,0 +1,16 @@
+# Secrets
+.env
+gps-tracker-*.json
+*.json
+
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# System Files
+.DS_Store
+Thumbs.db

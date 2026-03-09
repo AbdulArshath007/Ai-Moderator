@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS - Chat Moderation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Phosphor Icons (Standard UI Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Three.js (For Dither Background) -->
+    <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            color: #ffffff;
+        }
+
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.45);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            border-radius: 36px;
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 10px 20px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 9999px;
+            /* Pill shape for liquid look */
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+            box-shadow:
+                0 15px 25px rgba(234, 62, 154, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: border-color 0.2s;
+            color: white;
+        }
+
+        .glass-input:focus {
+            border-color: #ea3e9a;
+        }
+
+        .chat-input-glass {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        #chat-app {
+            clip-path: circle(0% at 50% 50%);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .warning-modal {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Three.js Canvas Background -->
+    <div id="canvas-container" class="fixed inset-0 z-0 bg-black pointer-events-none"></div>
+
+    <!-- === LANDING PAGE / AUTH === -->
+    <div id="landing-page" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
+
+        <!-- Main Welcome -->
+        <div id="auth-main"
+            class="glass-card rounded-[2rem] p-12 max-w-lg w-full text-center flex flex-col items-center relative overflow-hidden fade-in">
+            <h1 class="text-6xl font-extrabold mb-4 tracking-tight drop-shadow-md">AEGIS</h1>
+            <p class="text-gray-300 mb-10 text-lg">Join the learning community. AI-moderated, safe, and real-time.</p>
+            <div class="flex flex-col w-full gap-4 relative z-10">
+                <button onclick="showModal('login-modal')"
+                    class="glass-btn py-3.5 px-6 rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 cursor-pointer text-[#ea3e9a]">Sign
+                    In</button>
+                <button onclick="showModal('signup-modal')"
+                    class="glass-btn py-3.5 px-6 rounded-2xl font-semibold text-lg cursor-pointer hover:bg-white/10">Create
+                    Account</button>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div id="login-modal"
+            class="hidden glass-card rounded-[2rem] p-10 max-w-sm w-full text-center flex flex-col relative fade-in">
+            <button onclick="showModal('auth-main')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i
+                    class="ph ph-arrow-left text-xl"></i></button>
+            <h2 class="text-2xl font-bold mb-6 mt-2">Welcome Back</h2>
+            <form id="login-form" class="flex flex-col gap-4">
+                <input type="text" id="login-user" placeholder="Username" required
+                    class="glass-input rounded-xl px-4 py-3 text-sm placeholder-gray-500">
+                <input type="password" id="login-pass" placeholder="Password" required
+                    class="glass-input rounded-xl px-4 py-3 text-sm placeholder-gray-500">
+                <button type="submit"
+                    class="w-full relative overflow-hidden group py-3 rounded-full font-semibold text-sm bg-black/30 backdrop-blur-xl border border-white/20 shadow-[0_10px_30px_rgba(234,62,154,0.3)] mt-2 cursor-pointer text-white transition-all duration-300 hover:bg-black/50 hover:shadow-[0_15px_40px_rgba(234,62,154,0.5)]">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-tr from-[#ff0ade]/40 to-[#ea3e9a]/60 opacity-80 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-50"></div>
+                    <span class="relative z-10 drop-shadow-md tracking-wide">Sign In</span>
+                </button>
+                <p id="login-error" class="text-red-400 text-xs hidden"></p>
+            </form>
+        </div>
+
+        <!-- Signup Modal -->
+        <div id="signup-modal"
+            class="hidden glass-card rounded-[2rem] p-8 max-w-md w-full text-center flex flex-col relative fade-in max-h-[90vh] overflow-y-auto">
+            <button onclick="showModal('auth-main')" class="absolute top-4 left-4 text-gray-400 hover:text-white"><i
+                    class="ph ph-arrow-left text-xl"></i></button>
+            <h2 class="text-2xl font-bold mb-6 mt-2">Create Account</h2>
+            <form id="signup-form" class="flex flex-col gap-4 text-left">
+                <!-- Role Selection -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">I am a...</label>
+                    <select id="reg-role" class="glass-input w-full rounded-xl px-4 py-3 text-sm bg-black/80"
+                        onchange="toggleStudentFields()">
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher (Admin)</option>
+                    </select>
+                </div>
+
+                <input type="text" id="reg-name" placeholder="Full Name" required
+                    class="glass-input w-full rounded-xl px-4 py-3 text-sm placeholder-gray-500">
+                <input type="text" id="reg-user" placeholder="Username" required
+                    class="glass-input w-full rounded-xl px-4 py-3 text-sm placeholder-gray-500">
+                <input type="password" id="reg-pass" placeholder="Password" required
+                    class="glass-input w-full rounded-xl px-4 py-3 text-sm placeholder-gray-500">
+
+                <!-- Student Only Fields -->
+                <div id="student-fields" class="flex flex-col gap-4 fade-in">
+                    <input type="text" id="reg-dept" placeholder="Department (e.g. CS, IT)"
+                        class="glass-input w-full rounded-xl px-4 py-3 text-sm placeholder-gray-500">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1">Profile Picture (Stored safely in
+                            GDrive)</label>
+                        <input type="file" id="reg-pic" accept="image/*"
+                            class="glass-input w-full rounded-xl px-3 py-2 text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#ea3e9a]/20 file:text-[#ea3e9a] hover:file:bg-[#ea3e9a]/30 cursor-pointer">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit-reg"
+                    class="w-full relative overflow-hidden group py-3 rounded-full font-semibold text-sm bg-black/30 backdrop-blur-xl border border-white/20 shadow-[0_10px_30px_rgba(234,62,154,0.3)] mt-2 cursor-pointer text-white transition-all duration-300 hover:bg-black/50 hover:shadow-[0_15px_40px_rgba(234,62,154,0.5)] flex justify-center items-center gap-2">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-tr from-[#ff0ade]/40 to-[#ea3e9a]/60 opacity-80 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-50"></div>
+                    <span class="relative z-10 drop-shadow-md tracking-wide">Create Account</span>
+                    <i id="reg-spinner" class="ph ph-spinner animate-spin hidden text-lg relative z-10"></i>
+                </button>
+                <p id="reg-error" class="text-red-400 text-xs text-center hidden mb-2"></p>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- === CHAT APP (Discord Layout Clone) === -->
+    <div id="chat-app" class="fixed inset-0 z-20 flex bg-black/20 backdrop-blur-md">
+
+        <!-- Sidebar 1: Servers/Groups -->
+        <nav class="w-[72px] glass-panel flex flex-col items-center py-4 gap-4 flex-shrink-0 z-30">
+            <div
+                class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-white/10 flex items-center justify-center cursor-pointer transition-all duration-300 border border-white/20 glass-btn shadow-lg">
+                <i class="ph-fill ph-house text-2xl text-white"></i>
+            </div>
+            <div class="w-8 h-[2px] bg-white/10 rounded-full my-1"></div>
+            <!-- Groups -->
+            <div class="relative group">
+                <div
+                    class="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full transition-all duration-300 scale-0 group-hover:scale-100">
+                </div>
+                <div
+                    class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-gradient-to-br from-[#ff0ade] to-[#ea3e9a] flex items-center justify-center cursor-pointer transition-all duration-300 shadow-[0_4px_16px_rgba(234,62,154,0.4)] relative">
+                    <span class="font-bold text-lg">FS</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar 2: Channels & Info -->
+        <div class="w-60 glass-panel flex flex-col flex-shrink-0 z-20 border-l border-white/5 border-r">
+            <div
+                class="h-12 border-b border-white/10 flex items-center px-4 shadow-sm hover:bg-white/5 cursor-pointer transition-colors">
+                <h2 class="font-bold truncate text-md drop-shadow-md">Full Stack Java</h2>
+                <i class="ph ph-caret-down ml-auto"></i>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-2">
+                <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-2">Text Channels
+                </div>
+                <div
+                    class="flex items-center gap-2 px-2 py-1.5 rounded bg-white/10 text-white cursor-pointer mb-1 shadow-sm border border-white/5">
+                    <i class="ph ph-hash text-gray-400"></i>
+                    <span class="font-medium text-sm">general</span>
+                </div>
+
+                <!-- Rules Panel -->
+                <div class="mt-6 glass-card p-3 rounded-xl border-l-4 border-l-[#ff0ade] shadow-md mx-1">
+                    <div class="font-semibold text-[#ff0ade] mb-1.5 text-xs flex items-center gap-1.5">
+                        <i class="ph ph-shield-check text-sm"></i> Active Rules
+                    </div>
+                    <ul class="text-gray-300 space-y-1 text-xs list-disc pl-4 opacity-90">
+                        <li>No toxic behavior</li>
+                        <li>Stay on topic (Java/Web)</li>
+                        <li>No spamming</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Profile Area -->
+            <div class="h-[60px] bg-black/40 flex items-center px-3 gap-3 border-t border-white/10">
+                <div class="relative cursor-pointer group flex-shrink-0">
+                    <img id="profile-img" src="https://i.pravatar.cc/150?u=a042581f4e290267041" alt="Profile"
+                        class="w-10 h-10 rounded-full border border-white/20 group-hover:opacity-80 transition-opacity object-cover">
+                    <div
+                        class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-black rounded-full">
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0 cursor-pointer flex flex-col justify-center">
+                    <div id="profile-name" class="text-sm font-semibold truncate leading-tight hover:underline">Student
+                    </div>
+                    <div
+                        class="text-[10px] text-gray-400 truncate mt-0.5 uppercase tracking-wide flex items-center justify-between">
+                        <span id="profile-dept">Online</span>
+                        <button onclick="logout()" class="hover:text-red-400 transition-colors cursor-pointer"><i
+                                class="ph-fill ph-sign-out"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col bg-transparent relative z-10">
+            <!-- Header -->
+            <div
+                class="h-12 border-b border-white/10 bg-black/20 backdrop-blur-md flex items-center px-4 gap-4 shadow-sm z-20">
+                <i class="ph ph-hash text-2xl text-gray-400"></i>
+                <h3 class="font-bold text-[15px]">general</h3>
+                <div class="w-[1px] h-5 bg-white/10 mx-2"></div>
+                <p class="text-sm text-gray-400 truncate hidden md:block">Welcome to the main discussion!</p>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                <div class="mt-auto"></div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 pt-0 pb-6 z-20">
+                <div
+                    class="chat-input-glass rounded-xl flex items-center p-2 px-4 shadow-xl focus-within:ring-1 focus-within:ring-[#ea3e9a]/50 transition-all focus-within:bg-black/60 relative">
+                    <div class="p-1 rounded-full hover:bg-white/10 cursor-pointer mr-3 transition-colors">
+                        <i class="ph-fill ph-plus-circle text-[22px] text-gray-400 hover:text-white"></i>
+                    </div>
+                    <input type="text" id="chat-input" placeholder="Message #general..." autocomplete="off"
+                        class="bg-transparent border-none outline-none flex-1 text-[15px] text-white placeholder-gray-500 py-1.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div class="flex gap-1.5 text-[22px] text-gray-400 ml-2">
+                        <button id="btn-emoji"
+                            class="hover:text-white hover:bg-white/10 p-1 rounded cursor-pointer transition-colors border-none bg-transparent flex items-center">
+                            <i class="ph-fill ph-smiley"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Emoji Picker Popup -->
+                <div id="emoji-picker"
+                    class="hidden absolute bottom-[100px] right-8 glass-card rounded-2xl p-4 shadow-2xl z-50 w-64 backdrop-blur-2xl bg-black/80">
+                    <div class="grid grid-cols-6 gap-2" id="emoji-grid"></div>
+                </div>
+
+                <div class="text-[11px] font-medium text-gray-500 mt-2 px-2 flex justify-between">
+                    <span>Chat responsibly. AI Moderation is active.</span>
+                    <span class="text-[#ea3e9a] flex items-center gap-1 drop-shadow-sm"><i
+                            class="ph-fill ph-shield-check"></i> Moderation Active</span>
+                </div>
+            </div>
+
+            <!-- Warning Modal -->
+            <div id="warning-modal"
+                class="warning-modal absolute bottom-28 left-1/2 -translate-x-1/2 glass-card border border-red-500/40 bg-red-950/70 px-6 py-4 rounded-[1.25rem] flex items-center gap-4 shadow-[0_8px_32px_0_rgba(220,38,38,0.4)] z-50 w-max max-w-[90%] backdrop-blur-2xl">
+                <div
+                    class="w-11 h-11 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 text-red-500 border border-red-500/30">
+                    <i class="ph-fill ph-warning-octagon text-2xl"></i>
+                </div>
+                <div class="flex-1 pr-4">
+                    <h4 class="font-bold text-red-400 text-sm tracking-wide">AI Moderator Action</h4>
+                    <p id="warning-reason" class="text-sm text-gray-200 mt-0.5 leading-snug">Your message violates
+                        community guidelines.</p>
+                </div>
+                <button id="close-warning"
+                    class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer border border-transparent hover:border-white/20">
+                    <i class="ph ph-x font-bold"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        const API_URL = '/api/auth';
+        let currentUser = null;
+        let socket = null;
+
+        const landingPage = document.getElementById('landing-page');
+        const chatApp = document.getElementById('chat-app');
+        const chatInput = document.getElementById('chat-input');
+        const msgsContainer = document.getElementById('messages-container');
+
+        // -------------------------
+        // INITIAL LOAD & AUTH CHECK
+        // -------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            const session = localStorage.getItem('chatSession');
+            if (session) {
+                currentUser = JSON.parse(session);
+                if (currentUser.role === 'admin') {
+                    window.location.href = '/admin.html'; // Instructed behavior: Teachers go to admin
+                } else {
+                    initAppUI();
+                }
+            }
+        });
+
+        // -------------------------
+        // MODAL MANAGEMENT
+        // -------------------------
+        function showModal(id) {
+            ['auth-main', 'login-modal', 'signup-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function toggleStudentFields() {
+            const role = document.getElementById('reg-role').value;
+            const fields = document.getElementById('student-fields');
+            if (role === 'student') fields.classList.remove('hidden');
+            else fields.classList.add('hidden');
+        }
+
+        // -------------------------
+        // FORMS (Login & Signup)
+        // -------------------------
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errEl = document.getElementById('login-error');
+            errEl.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('login-user').value,
+                        password: document.getElementById('login-pass').value
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Login failed');
+
+                handleAuthSuccess(data.user);
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errEl = document.getElementById('reg-error');
+            const spinner = document.getElementById('reg-spinner');
+            const btnSubmit = document.getElementById('btn-submit-reg');
+            errEl.classList.add('hidden');
+            btnSubmit.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const role = document.getElementById('reg-role').value;
+                const formData = new FormData();
+                formData.append('role', role);
+                formData.append('name', document.getElementById('reg-name').value);
+                formData.append('username', document.getElementById('reg-user').value);
+                formData.append('password', document.getElementById('reg-pass').value);
+
+                if (role === 'student') {
+                    formData.append('department', document.getElementById('reg-dept').value);
+                    const fileInput = document.getElementById('reg-pic');
+                    if (fileInput.files.length > 0) {
+                        formData.append('profilePic', fileInput.files[0]);
+                    }
+                }
+
+                const res = await fetch(`${API_URL}/signup`, {
+                    method: 'POST',
+                    body: formData // DO NOT set Content-Type header manually when using FormData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Signup failed');
+
+                handleAuthSuccess(data.user);
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            } finally {
+                btnSubmit.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+
+        function handleAuthSuccess(user) {
+            localStorage.setItem('chatSession', JSON.stringify(user));
+            currentUser = user;
+            if (user.role === 'admin') {
+                window.location.href = '/admin.html';
+            } else {
+                initAppUI();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('chatSession');
+            window.location.reload();
+        }
+
+        // -------------------------
+        // INIT CHAT UI & GSAP
+        // -------------------------
+        function initAppUI() {
+            document.getElementById('profile-name').textContent = currentUser.name || currentUser.username;
+            if (currentUser.profile_pic_url) {
+                document.getElementById('profile-img').src = currentUser.profile_pic_url;
+            }
+
+            // GSAP Transition In
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            chatApp.style.opacity = 1;
+            chatApp.style.pointerEvents = 'auto';
+
+            const maxDist = Math.max(
+                Math.hypot(x, y), Math.hypot(window.innerWidth - x, y),
+                Math.hypot(x, window.innerHeight - y), Math.hypot(window.innerWidth - x, window.innerHeight - y)
+            );
+
+            // Blur the background canvas
+            gsap.to('#canvas-container', { filter: 'blur(10px)', duration: 1.2, ease: "power2.inOut" });
+
+            gsap.fromTo(chatApp,
+                { clipPath: `circle(0px at ${x}px ${y}px)` },
+                {
+                    clipPath: `circle(${maxDist}px at ${x}px ${y}px)`,
+                    duration: 1.2,
+                    ease: "power3.inOut",
+                    onComplete: () => {
+                        landingPage.style.display = 'none';
+                        chatApp.style.clipPath = 'none';
+                        chatInput.focus();
+                        initSocket(); // Connect to server once UI is rendered
+                    }
+                }
+            );
+            gsap.from("#chat-app > nav > div", { scale: 0, opacity: 0, duration: 0.5, stagger: 0.1, delay: 0.4, ease: "back.out(1.5)" });
+            gsap.from("#chat-app > div.w-60 > div > *", { x: -20, opacity: 0, duration: 0.4, stagger: 0.05, delay: 0.6 });
+        }
+
+
+        // -------------------------
+        // SOCKET.IO & CHAT LOGIC
+        // -------------------------
+        function initSocket() {
+            socket = io();
+            const currentGroupId = '1';
+
+            socket.on('connect', () => {
+                socket.emit('joinGroup', { userId: currentUser.id, groupId: currentGroupId });
+            });
+
+            // Chat Input
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                    const text = chatInput.value.trim();
+                    chatInput.value = '';
+
+                    const inputWrap = chatInput.parentElement;
+                    gsap.fromTo(inputWrap, { scale: 0.98 }, { scale: 1, duration: 0.2 });
+
+                    socket.emit('sendMessage', {
+                        userId: currentUser.id,
+                        groupId: currentGroupId,
+                        content: text,
+                        username: currentUser.username
+                    });
+                }
+            });
+
+            // Incoming Messages
+            socket.on('newMessage', (msgObj) => {
+                const isMe = msgObj.userId === currentUser.id;
+                appendMessage(msgObj.content, msgObj.username, isMe, msgObj.profilePicUrl);
+            });
+
+            // Flags / Bans / Penalties
+            socket.on('userFlagged', (data) => {
+                triggerWarning(data.message);
+                chatInput.disabled = true;
+                chatInput.placeholder = "Account restricted. Messages disabled.";
+                chatInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-red-900/20');
+            });
+
+            socket.on('messageBlocked', (data) => {
+                const inputWrap = chatInput.parentElement;
+                gsap.fromTo(inputWrap, { x: -6 }, { x: 6, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set(inputWrap, { x: 0 }) });
+                triggerWarning(data.reason);
+            });
+        }
+
+        function appendMessage(text, username, isMe) {
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const userColor = isMe ? '#c8046d' : '#7cff67';
+            // In a real app we'd pass the actual image src down from the DB, just using fallback for non-self msgs here
+            const avatarSrc = isMe ? (currentUser.profile_pic_url || 'https://i.pravatar.cc/150?u=fallback') : `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`;
+
+            const msgHtml = `
+                <div class="flex gap-4 p-2 pl-3 hover:bg-black/30 rounded-lg transition-colors group msg-node fade-in">
+                    <img src="${avatarSrc}" class="w-10 h-10 rounded-full flex-shrink-0 shadow-md border border-white/20 object-cover bg-white/5">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-[${userColor}]">${escapeHtml(username)}</span>
+                            <span class="text-[10px] text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-200 mt-0.5 text-sm leading-relaxed">${escapeHtml(text)}</p>
+                    </div>
+                </div>
+            `;
+            const div = document.createElement('div');
+            div.innerHTML = msgHtml;
+            msgsContainer.appendChild(div.firstElementChild);
+            msgsContainer.scrollTop = msgsContainer.scrollHeight;
+        }
+
+        // -------------------------
+        // WARNING MODAL
+        // -------------------------
+        const warningModal = document.getElementById('warning-modal');
+        const warningReason = document.getElementById('warning-reason');
+
+        function triggerWarning(reason) {
+            warningReason.textContent = reason;
+            gsap.killTweensOf(warningModal);
+            gsap.fromTo(warningModal,
+                { y: 60, autoAlpha: 0, scale: 0.95 },
+                { y: 0, autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(1.2)" }
+            );
+            gsap.to(warningModal, { y: 30, autoAlpha: 0, duration: 0.4, delay: 6, ease: "power2.in" });
+        }
+        document.getElementById('close-warning').addEventListener('click', () => {
+            gsap.to(warningModal, { y: 30, autoAlpha: 0, duration: 0.3, ease: "power2.in" });
+        });
+
+        // -------------------------
+        // EMOJI PICKER
+        // -------------------------
+        const emojiPicker = document.getElementById('emoji-picker');
+        const emojiBtn = document.getElementById('btn-emoji');
+        const emojiGrid = document.getElementById('emoji-grid');
+        const emojis = ['👍', '👎', '❤️', '🔥', '😂', '🥺', '✨', '🎉', '🚀', '🤔', '👀', '💯', '🙌', '👏', '✅', '❌', '💡', '🤓', '💻', '☕', '⚡', '🌟', '🤯', '💀'];
+        emojis.forEach(emoji => {
+            const btn = document.createElement('button');
+            btn.className = 'w-8 h-8 flex items-center justify-center text-xl hover:bg-white/10 rounded-lg transition-colors cursor-pointer';
+            btn.textContent = emoji;
+            btn.onclick = () => {
+                chatInput.value += emoji;
+                chatInput.focus();
+                emojiPicker.classList.add('hidden');
+            };
+            emojiGrid.appendChild(btn);
+        });
+        emojiBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            emojiPicker.classList.toggle('hidden');
+            if (!emojiPicker.classList.contains('hidden')) {
+                gsap.fromTo(emojiPicker, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2 });
+            }
+        });
+        document.addEventListener('click', (e) => {
+            if (!emojiPicker.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
+                emojiPicker.classList.add('hidden');
+            }
+        });
+
+        // -------------------------
+        // UTILS
+        // -------------------------
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        }
+
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        // Combining the user's React Three Fiber wave&dither shader code into vanilla Three.js WebGL2 shader
+        function initDitheredWaves() {
+            const container = document.getElementById('canvas-container');
+            const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false, stencil: false, depth: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+            const mousePos = new THREE.Vector2(0, 0);
+            document.addEventListener('mousemove', (e) => {
+                mousePos.set(e.clientX * renderer.getPixelRatio(), (window.innerHeight - e.clientY) * renderer.getPixelRatio());
+            });
+
+            const uniforms = {
+                time: { value: 0 },
+                resolution: { value: new THREE.Vector2(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio()) },
+                waveSpeed: { value: 0.05 },
+                waveFrequency: { value: 3.0 },
+                waveAmplitude: { value: 0.3 },
+                waveColor: { value: new THREE.Color(0.8, 0.1, 0.5) }, // Vibrant purple/pink
+                colorNum: { value: 4.0 },
+                pixelSize: { value: 2.0 },
+                mousePos: { value: mousePos },
+                enableMouseInteraction: { value: 0 }, // Disabled
+                mouseRadius: { value: 1.0 }
+            };
+
+            const material = new THREE.ShaderMaterial({
+                glslVersion: THREE.GLSL3,
+                vertexShader: `
+                    void main() {
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec2 resolution; uniform float time; uniform float waveSpeed;
+                    uniform float waveFrequency; uniform float waveAmplitude; uniform vec3 waveColor;
+                    uniform float colorNum; uniform float pixelSize;
+                    uniform vec2 mousePos; uniform int enableMouseInteraction; uniform float mouseRadius;
+                    
+                    out vec4 fragColor;
+
+                    vec4 mod289(vec4 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+                    vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+                    vec2 fade(vec2 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }
+                    
+                    float cnoise(vec2 P) {
+                        vec4 Pi = floor(P.xyxy) + vec4(0.0,0.0,1.0,1.0);
+                        vec4 Pf = fract(P.xyxy) - vec4(0.0,0.0,1.0,1.0);
+                        Pi = mod289(Pi);
+                        vec4 ix = Pi.xzxz; vec4 iy = Pi.yyww;
+                        vec4 fx = Pf.xzxz; vec4 fy = Pf.yyww;
+                        vec4 i = permute(permute(ix) + iy);
+                        vec4 gx = fract(i * (1.0/41.0)) * 2.0 - 1.0;
+                        vec4 gy = abs(gx) - 0.5;
+                        vec4 tx = floor(gx + 0.5);
+                        gx = gx - tx;
+                        vec2 g00 = vec2(gx.x, gy.x); vec2 g10 = vec2(gx.y, gy.y);
+                        vec2 g01 = vec2(gx.z, gy.z); vec2 g11 = vec2(gx.w, gy.w);
+                        vec4 norm = taylorInvSqrt(vec4(dot(g00,g00), dot(g01,g01), dot(g10,g10), dot(g11,g11)));
+                        g00 *= norm.x; g01 *= norm.y; g10 *= norm.z; g11 *= norm.w;
+                        float n00 = dot(g00, vec2(fx.x, fy.x)); float n10 = dot(g10, vec2(fx.y, fy.y));
+                        float n01 = dot(g01, vec2(fx.z, fy.z)); float n11 = dot(g11, vec2(fx.w, fy.w));
+                        vec2 fade_xy = fade(Pf.xy);
+                        vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+                        return 2.3 * mix(n_x.x, n_x.y, fade_xy.y);
+                    }
+
+                    const int OCTAVES = 4;
+                    float fbm(vec2 p) {
+                        float value = 0.0; float amp = 1.0; float freq = waveFrequency;
+                        for (int i = 0; i < OCTAVES; i++) {
+                            value += amp * abs(cnoise(p)); p *= freq; amp *= waveAmplitude;
+                        }
+                        return value;
+                    }
+
+                    float pattern(vec2 p) {
+                        vec2 p2 = p - time * waveSpeed;
+                        return fbm(p + fbm(p2)); 
+                    }
+
+                    const float bayerMatrix8x8[64] = float[64](
+                        0.0/64.0, 48.0/64.0, 12.0/64.0, 60.0/64.0,  3.0/64.0, 51.0/64.0, 15.0/64.0, 63.0/64.0,
+                        32.0/64.0,16.0/64.0, 44.0/64.0, 28.0/64.0, 35.0/64.0,19.0/64.0, 47.0/64.0, 31.0/64.0,
+                        8.0/64.0, 56.0/64.0,  4.0/64.0, 52.0/64.0, 11.0/64.0,59.0/64.0,  7.0/64.0, 55.0/64.0,
+                        40.0/64.0,24.0/64.0, 36.0/64.0, 20.0/64.0, 43.0/64.0,27.0/64.0, 39.0/64.0, 23.0/64.0,
+                        2.0/64.0, 50.0/64.0, 14.0/64.0, 62.0/64.0,  1.0/64.0,49.0/64.0, 13.0/64.0, 61.0/64.0,
+                        34.0/64.0,18.0/64.0, 46.0/64.0, 30.0/64.0, 33.0/64.0,17.0/64.0, 45.0/64.0, 29.0/64.0,
+                        10.0/64.0,58.0/64.0,  6.0/64.0, 54.0/64.0,  9.0/64.0,57.0/64.0,  5.0/64.0, 53.0/64.0,
+                        42.0/64.0,26.0/64.0, 38.0/64.0, 22.0/64.0, 41.0/64.0,25.0/64.0, 37.0/64.0, 21.0/64.0
+                    );
+
+                    vec3 ditherEffect(vec2 uv, vec3 color) {
+                        vec2 scaledCoord = floor(gl_FragCoord.xy / pixelSize);
+                        int x = int(mod(scaledCoord.x, 8.0));
+                        int y = int(mod(scaledCoord.y, 8.0));
+                        float threshold = bayerMatrix8x8[y * 8 + x] - 0.25;
+                        float step = 1.0 / (colorNum - 1.0);
+                        color += threshold * step;
+                        float bias = 0.2;
+                        color = clamp(color - bias, 0.0, 1.0);
+                        return floor(color * (colorNum - 1.0) + 0.5) / (colorNum - 1.0);
+                    }
+
+                    void main() {
+                        vec2 uv = gl_FragCoord.xy / resolution.xy;
+                        uv -= 0.5;
+                        uv.x *= resolution.x / resolution.y;
+                        
+                        float f = pattern(uv);
+                        
+                        if (enableMouseInteraction == 1) {
+                            vec2 mouseNDC = (mousePos / resolution - 0.5);
+                            mouseNDC.x *= resolution.x / resolution.y;
+                            float dist = length(uv - mouseNDC);
+                            float effect = 1.0 - smoothstep(0.0, mouseRadius, dist);
+                            f -= 0.5 * effect;
+                        }
+
+                        vec3 col = mix(vec3(0.0), waveColor, f);
+                        col = ditherEffect(uv, col);
+                        
+                        fragColor = vec4(col, 1.0);
+                    }
+                `,
+                uniforms: uniforms
+            });
+            scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+            const clock = new THREE.Clock();
+            window.addEventListener('resize', () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                uniforms.resolution.value.set(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
+            });
+            function render() { requestAnimationFrame(render); uniforms.time.value = clock.getElapsedTime(); renderer.render(scene, camera); }
+            render();
+        }
+        initDitheredWaves();
+    </script>
+</body>
+
+</html>
