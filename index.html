@@ -393,7 +393,7 @@
             const session = localStorage.getItem('chatSession');
             if (session) {
                 currentUser = JSON.parse(session);
-                if (currentUser.role === 'admin') {
+                if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
                     window.location.href = '/admin.html'; // Instructed behavior: Teachers go to admin
                 } else {
                     initAppUI();
@@ -492,7 +492,7 @@
         function handleAuthSuccess(user) {
             localStorage.setItem('chatSession', JSON.stringify(user));
             currentUser = user;
-            if (user.role === 'admin') {
+            if (user.role === 'admin' || user.role === 'teacher') {
                 window.location.href = '/admin.html';
             } else {
                 initAppUI();
