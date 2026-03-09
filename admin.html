@@ -154,8 +154,8 @@
                 <div class="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent opacity-60"></div>
                 <i class="ph-fill ph-shield-star text-3xl text-white relative z-10 drop-shadow-md"></i>
             </div>
-            <h1 class="text-2xl font-extrabold mb-1 tracking-tight">Admin Panel</h1>
-            <p class="text-gray-400 text-sm mb-8">Sign in to manage your chat moderation</p>
+            <h1 class="text-2xl font-extrabold mb-1 tracking-tight">Teacher Dashboard</h1>
+            <p class="text-gray-400 text-sm mb-8">Sign in to manage your students</p>
 
             <div class="flex flex-col gap-3">
                 <input type="text" id="login-user" placeholder="Username"
@@ -186,7 +186,7 @@
                         <i class="ph-fill ph-shield-star text-xl text-white"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg font-bold tracking-tight">Admin Dashboard</h1>
+                        <h1 class="text-lg font-bold tracking-tight">Teacher Dashboard</h1>
                         <p class="text-[11px] text-gray-500 flex items-center gap-1"><span
                                 class="w-1.5 h-1.5 bg-green-500 rounded-full pulse-dot"></span> Live Monitoring</p>
                     </div>
@@ -338,6 +338,23 @@
         // ========================
         // AUTH
         // ========================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const session = localStorage.getItem('chatSession');
+            if (session) {
+                const currentUser = JSON.parse(session);
+                if (currentUser.role === 'admin' || currentUser.role === 'teacher') {
+                    isLoggedIn = true;
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    loadAll();
+                } else {
+                    // If a student somehow gets here, send them back
+                    window.location.href = '/';
+                }
+            }
+        });
+
         document.getElementById('login-btn').addEventListener('click', doLogin);
         document.getElementById('login-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
 
@@ -372,6 +389,7 @@
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             isLoggedIn = false;
+            localStorage.removeItem('chatSession');
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('login-user').value = '';
