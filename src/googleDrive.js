@@ -12,7 +12,11 @@ let authConfig = { scopes: SCOPES };
 if (fs.existsSync(KEYFILEPATH)) {
     authConfig.keyFile = KEYFILEPATH;
 } else if (process.env.GOOGLE_CREDENTIALS) {
-    authConfig.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    try {
+        authConfig.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    } catch (err) {
+        console.error("CRITICAL ERROR: GOOGLE_CREDENTIALS is not valid JSON! Please check your Vercel Environment Variables. Did you paste the exact raw JSON object?", err.message);
+    }
 } else {
     console.warn("No Google Auth credentials found. Set GOOGLE_CREDENTIALS in your environment.");
 }
