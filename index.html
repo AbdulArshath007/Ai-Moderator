@@ -316,424 +316,425 @@
                     </div>
                 </div>
             </div>
+        </div> <!-- Closing #sidebar-drawer -->
 
-            <!-- Main Chat Area -->
-            <div class="flex-1 flex flex-col bg-transparent relative z-10 w-full min-w-0" role="main">
-                <!-- Header -->
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col bg-transparent relative z-10 w-full min-w-0" role="main">
+            <!-- Header -->
+            <div
+                class="h-12 border-b border-white/10 bg-black/20 backdrop-blur-md flex items-center px-4 gap-3 shadow-sm z-20">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-400 hover:text-white"
+                    aria-label="Open Sidebar Menu">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <i class="ph ph-hash text-2xl text-gray-400 hidden md:block"></i>
+                <h3 id="chat-header-name" class="font-bold text-[15px]">...</h3>
+                <div class="w-[1px] h-5 bg-white/10 mx-2 hidden md:block"></div>
+                <p class="text-sm text-gray-400 truncate hidden md:block">Welcome to the main discussion!</p>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                <div class="mt-auto"></div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-2 md:p-4 pt-0 pb-6 z-20">
                 <div
-                    class="h-12 border-b border-white/10 bg-black/20 backdrop-blur-md flex items-center px-4 gap-3 shadow-sm z-20">
-                    <button onclick="toggleMobileMenu()" class="md:hidden text-gray-400 hover:text-white"
-                        aria-label="Open Sidebar Menu">
-                        <i class="ph ph-list text-2xl"></i>
+                    class="chat-input-glass rounded-xl flex items-center p-1 md:p-2 px-3 md:px-4 shadow-xl focus-within:ring-1 focus-within:ring-[#ea3e9a]/50 transition-all focus-within:bg-black/60 relative">
+                    <button
+                        class="p-1 rounded-full hover:bg-white/10 cursor-pointer mr-2 md:mr-3 transition-colors border-none bg-transparent"
+                        aria-label="Add Attachment">
+                        <i class="ph-fill ph-plus-circle text-[22px] text-gray-400 hover:text-white"></i>
                     </button>
-                    <i class="ph ph-hash text-2xl text-gray-400 hidden md:block"></i>
-                    <h3 id="chat-header-name" class="font-bold text-[15px]">...</h3>
-                    <div class="w-[1px] h-5 bg-white/10 mx-2 hidden md:block"></div>
-                    <p class="text-sm text-gray-400 truncate hidden md:block">Welcome to the main discussion!</p>
-                </div>
-
-                <!-- Messages Stream -->
-                <div id="messages-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-                    <div class="mt-auto"></div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="p-2 md:p-4 pt-0 pb-6 z-20">
-                    <div
-                        class="chat-input-glass rounded-xl flex items-center p-1 md:p-2 px-3 md:px-4 shadow-xl focus-within:ring-1 focus-within:ring-[#ea3e9a]/50 transition-all focus-within:bg-black/60 relative">
-                        <button
-                            class="p-1 rounded-full hover:bg-white/10 cursor-pointer mr-2 md:mr-3 transition-colors border-none bg-transparent"
-                            aria-label="Add Attachment">
-                            <i class="ph-fill ph-plus-circle text-[22px] text-gray-400 hover:text-white"></i>
+                    <input type="text" id="chat-input" placeholder="Message #general..." autocomplete="off"
+                        aria-label="Message Input"
+                        class="bg-transparent border-none outline-none flex-1 text-[15px] text-white placeholder-gray-500 py-1.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed min-w-0">
+                    <div class="flex gap-1.5 text-[22px] text-gray-400 ml-2 flex-shrink-0">
+                        <button id="btn-emoji" aria-label="Toggle Emoji Picker"
+                            class="hover:text-white hover:bg-white/10 p-1 rounded cursor-pointer transition-colors border-none bg-transparent flex items-center">
+                            <i class="ph-fill ph-smiley"></i>
                         </button>
-                        <input type="text" id="chat-input" placeholder="Message #general..." autocomplete="off"
-                            aria-label="Message Input"
-                            class="bg-transparent border-none outline-none flex-1 text-[15px] text-white placeholder-gray-500 py-1.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed min-w-0">
-                        <div class="flex gap-1.5 text-[22px] text-gray-400 ml-2 flex-shrink-0">
-                            <button id="btn-emoji" aria-label="Toggle Emoji Picker"
-                                class="hover:text-white hover:bg-white/10 p-1 rounded cursor-pointer transition-colors border-none bg-transparent flex items-center">
-                                <i class="ph-fill ph-smiley"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Emoji Picker Popup -->
-                    <div id="emoji-picker"
-                        class="hidden absolute bottom-[80px] md:bottom-[100px] right-4 md:right-8 glass-card rounded-2xl p-4 shadow-2xl z-50 w-64 backdrop-blur-2xl bg-black/80">
-                        <div class="grid grid-cols-6 gap-2" id="emoji-grid"></div>
-                    </div>
-
-                    <div class="text-[11px] font-medium text-gray-500 mt-2 px-2 flex justify-between">
-                        <span>Chat responsibly. AI Moderation is active.</span>
-                        <span class="text-[#ea3e9a] flex items-center gap-1 drop-shadow-sm"><i
-                                class="ph-fill ph-shield-check"></i> Moderation Active</span>
                     </div>
                 </div>
+                <!-- Emoji Picker Popup -->
+                <div id="emoji-picker"
+                    class="hidden absolute bottom-[80px] md:bottom-[100px] right-4 md:right-8 glass-card rounded-2xl p-4 shadow-2xl z-50 w-64 backdrop-blur-2xl bg-black/80">
+                    <div class="grid grid-cols-6 gap-2" id="emoji-grid"></div>
+                </div>
 
-                <!-- Warning Modal -->
-                <div id="warning-modal"
-                    class="warning-modal absolute bottom-28 left-1/2 -translate-x-1/2 glass-card border border-red-500/40 bg-red-950/70 px-6 py-4 rounded-[1.25rem] flex items-center gap-4 shadow-[0_8px_32px_0_rgba(220,38,38,0.4)] z-50 w-max max-w-[90%] backdrop-blur-2xl">
-                    <div
-                        class="w-11 h-11 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 text-red-500 border border-red-500/30">
-                        <i class="ph-fill ph-warning-octagon text-2xl"></i>
-                    </div>
-                    <div class="flex-1 pr-4">
-                        <h4 class="font-bold text-red-400 text-sm tracking-wide">AI Moderator Action</h4>
-                        <p id="warning-reason" class="text-sm text-gray-200 mt-0.5 leading-snug">Your message violates
-                            community guidelines.</p>
-                    </div>
-                    <button id="close-warning" aria-label="Dismiss Warning"
-                        class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer border border-transparent hover:border-white/20 flex-shrink-0">
-                        <i class="ph ph-x font-bold"></i>
-                    </button>
+                <div class="text-[11px] font-medium text-gray-500 mt-2 px-2 flex justify-between">
+                    <span>Chat responsibly. AI Moderation is active.</span>
+                    <span class="text-[#ea3e9a] flex items-center gap-1 drop-shadow-sm"><i
+                            class="ph-fill ph-shield-check"></i> Moderation Active</span>
                 </div>
             </div>
+
+            <!-- Warning Modal -->
+            <div id="warning-modal"
+                class="warning-modal absolute bottom-28 left-1/2 -translate-x-1/2 glass-card border border-red-500/40 bg-red-950/70 px-6 py-4 rounded-[1.25rem] flex items-center gap-4 shadow-[0_8px_32px_0_rgba(220,38,38,0.4)] z-50 w-max max-w-[90%] backdrop-blur-2xl">
+                <div
+                    class="w-11 h-11 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 text-red-500 border border-red-500/30">
+                    <i class="ph-fill ph-warning-octagon text-2xl"></i>
+                </div>
+                <div class="flex-1 pr-4">
+                    <h4 class="font-bold text-red-400 text-sm tracking-wide">AI Moderator Action</h4>
+                    <p id="warning-reason" class="text-sm text-gray-200 mt-0.5 leading-snug">Your message violates
+                        community guidelines.</p>
+                </div>
+                <button id="close-warning" aria-label="Dismiss Warning"
+                    class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer border border-transparent hover:border-white/20 flex-shrink-0">
+                    <i class="ph ph-x font-bold"></i>
+                </button>
+            </div>
         </div>
+    </div>
 
-        <!-- Application Logic -->
-        <script>
-            const API_URL = '/api/auth';
-            let currentUser = null;
-            let socket = null;
-            let activeGroupId = '1';
+    <!-- Application Logic -->
+    <script>
+        const API_URL = '/api/auth';
+        let currentUser = null;
+        let socket = null;
+        let activeGroupId = '1';
 
-            const landingPage = document.getElementById('landing-page');
-            const chatApp = document.getElementById('chat-app');
-            const chatInput = document.getElementById('chat-input');
-            const msgsContainer = document.getElementById('messages-container');
+        const landingPage = document.getElementById('landing-page');
+        const chatApp = document.getElementById('chat-app');
+        const chatInput = document.getElementById('chat-input');
+        const msgsContainer = document.getElementById('messages-container');
 
-            // --- Mobile Menu Toggle ---
-            function toggleMobileMenu() {
-                const drawer = document.getElementById('sidebar-drawer');
-                const overlay = document.getElementById('mobile-overlay');
-                if (drawer.classList.contains('-translate-x-full')) {
-                    drawer.classList.remove('-translate-x-full');
-                    overlay.classList.remove('hidden');
+        // --- Mobile Menu Toggle ---
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('sidebar-drawer');
+            const overlay = document.getElementById('mobile-overlay');
+            if (drawer.classList.contains('-translate-x-full')) {
+                drawer.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                drawer.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // -------------------------
+        // INITIAL LOAD & AUTH CHECK
+        // -------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            const session = localStorage.getItem('chatSession');
+            if (session) {
+                currentUser = JSON.parse(session);
+                const teacherIsViewingChat = sessionStorage.getItem('teacherViewingChat') === 'true';
+
+                if ((currentUser.role === 'admin' || currentUser.role === 'teacher') && !teacherIsViewingChat) {
+                    window.location.href = '/admin.html'; // Normal flow: Teacher logs in -> admin
                 } else {
-                    drawer.classList.add('-translate-x-full');
-                    overlay.classList.add('hidden');
+                    initAppUI(); // Student, OR Teacher who clicked "Chat App" from dashboard
                 }
             }
+        });
 
-            // -------------------------
-            // INITIAL LOAD & AUTH CHECK
-            // -------------------------
-            window.addEventListener('DOMContentLoaded', () => {
-                const session = localStorage.getItem('chatSession');
-                if (session) {
-                    currentUser = JSON.parse(session);
-                    const teacherIsViewingChat = sessionStorage.getItem('teacherViewingChat') === 'true';
+        // -------------------------
+        // MODAL MANAGEMENT
+        // -------------------------
+        function showModal(id) {
+            ['auth-main', 'login-modal', 'signup-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
 
-                    if ((currentUser.role === 'admin' || currentUser.role === 'teacher') && !teacherIsViewingChat) {
-                        window.location.href = '/admin.html'; // Normal flow: Teacher logs in -> admin
-                    } else {
-                        initAppUI(); // Student, OR Teacher who clicked "Chat App" from dashboard
-                    }
-                }
-            });
+        function toggleStudentFields() {
+            const role = document.getElementById('reg-role').value;
+            const fields = document.getElementById('student-fields');
+            if (role === 'student') fields.classList.remove('hidden');
+            else fields.classList.add('hidden');
+        }
 
-            // -------------------------
-            // MODAL MANAGEMENT
-            // -------------------------
-            function showModal(id) {
-                ['auth-main', 'login-modal', 'signup-modal'].forEach(m => document.getElementById(m).classList.add('hidden'));
-                document.getElementById(id).classList.remove('hidden');
+        // -------------------------
+        // FORMS (Login & Signup)
+        // -------------------------
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errEl = document.getElementById('login-error');
+            const submitBtn = document.querySelector('#login-form button[type="submit"]');
+
+            errEl.classList.add('hidden');
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('login-user').value,
+                        password: document.getElementById('login-pass').value
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Login failed');
+
+                handleAuthSuccess(data.user);
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+                submitBtn.disabled = false;
             }
+        });
 
-            function toggleStudentFields() {
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errEl = document.getElementById('reg-error');
+            const spinner = document.getElementById('reg-spinner');
+            const btnSubmit = document.getElementById('btn-submit-reg');
+            errEl.classList.add('hidden');
+            btnSubmit.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
                 const role = document.getElementById('reg-role').value;
-                const fields = document.getElementById('student-fields');
-                if (role === 'student') fields.classList.remove('hidden');
-                else fields.classList.add('hidden');
-            }
+                const formData = new FormData();
+                formData.append('role', role);
+                formData.append('name', document.getElementById('reg-name').value);
+                formData.append('username', document.getElementById('reg-user').value);
+                formData.append('password', document.getElementById('reg-pass').value);
 
-            // -------------------------
-            // FORMS (Login & Signup)
-            // -------------------------
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const errEl = document.getElementById('login-error');
-                const submitBtn = document.querySelector('#login-form button[type="submit"]');
-
-                errEl.classList.add('hidden');
-                submitBtn.disabled = true;
-
-                try {
-                    const res = await fetch(`${API_URL}/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            username: document.getElementById('login-user').value,
-                            password: document.getElementById('login-pass').value
-                        })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Login failed');
-
-                    handleAuthSuccess(data.user);
-                } catch (err) {
-                    errEl.textContent = err.message;
-                    errEl.classList.remove('hidden');
-                    submitBtn.disabled = false;
-                }
-            });
-
-            document.getElementById('signup-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const errEl = document.getElementById('reg-error');
-                const spinner = document.getElementById('reg-spinner');
-                const btnSubmit = document.getElementById('btn-submit-reg');
-                errEl.classList.add('hidden');
-                btnSubmit.disabled = true;
-                spinner.classList.remove('hidden');
-
-                try {
-                    const role = document.getElementById('reg-role').value;
-                    const formData = new FormData();
-                    formData.append('role', role);
-                    formData.append('name', document.getElementById('reg-name').value);
-                    formData.append('username', document.getElementById('reg-user').value);
-                    formData.append('password', document.getElementById('reg-pass').value);
-
-                    if (role === 'student') {
-                        formData.append('department', document.getElementById('reg-dept').value);
-                        const fileInput = document.getElementById('reg-pic');
-                        if (fileInput.files.length > 0) {
-                            formData.append('profilePic', fileInput.files[0]);
-                        }
+                if (role === 'student') {
+                    formData.append('department', document.getElementById('reg-dept').value);
+                    const fileInput = document.getElementById('reg-pic');
+                    if (fileInput.files.length > 0) {
+                        formData.append('profilePic', fileInput.files[0]);
                     }
-
-                    const res = await fetch(`${API_URL}/signup`, {
-                        method: 'POST',
-                        body: formData // DO NOT set Content-Type header manually when using FormData
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Signup failed');
-
-                    handleAuthSuccess(data.user);
-                } catch (err) {
-                    errEl.textContent = err.message;
-                    errEl.classList.remove('hidden');
-                } finally {
-                    btnSubmit.disabled = false;
-                    spinner.classList.add('hidden');
                 }
-            });
 
-            function handleAuthSuccess(user) {
-                localStorage.setItem('chatSession', JSON.stringify(user));
-                currentUser = user;
-                if (user.role === 'admin' || user.role === 'teacher') {
-                    window.location.href = '/admin.html';
-                } else {
-                    initAppUI();
-                }
+                const res = await fetch(`${API_URL}/signup`, {
+                    method: 'POST',
+                    body: formData // DO NOT set Content-Type header manually when using FormData
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Signup failed');
+
+                handleAuthSuccess(data.user);
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            } finally {
+                btnSubmit.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+
+        function handleAuthSuccess(user) {
+            localStorage.setItem('chatSession', JSON.stringify(user));
+            currentUser = user;
+            if (user.role === 'admin' || user.role === 'teacher') {
+                window.location.href = '/admin.html';
+            } else {
+                initAppUI();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('chatSession');
+            sessionStorage.removeItem('teacherViewingChat');
+            window.location.reload();
+        }
+
+        // -------------------------
+        // INIT CHAT UI & GSAP
+        // -------------------------
+        function initAppUI() {
+            document.getElementById('profile-name').textContent = currentUser.name || currentUser.username;
+            if (currentUser.profile_pic_url) {
+                document.getElementById('profile-img').src = currentUser.profile_pic_url;
             }
 
-            function logout() {
-                localStorage.removeItem('chatSession');
-                sessionStorage.removeItem('teacherViewingChat');
-                window.location.reload();
-            }
+            // GSAP Transition In
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            chatApp.style.opacity = 1;
+            chatApp.style.pointerEvents = 'auto';
 
-            // -------------------------
-            // INIT CHAT UI & GSAP
-            // -------------------------
-            function initAppUI() {
-                document.getElementById('profile-name').textContent = currentUser.name || currentUser.username;
-                if (currentUser.profile_pic_url) {
-                    document.getElementById('profile-img').src = currentUser.profile_pic_url;
-                }
+            const maxDist = Math.max(
+                Math.hypot(x, y), Math.hypot(window.innerWidth - x, y),
+                Math.hypot(x, window.innerHeight - y), Math.hypot(window.innerWidth - x, window.innerHeight - y)
+            );
 
-                // GSAP Transition In
-                const x = window.innerWidth / 2;
-                const y = window.innerHeight / 2;
-                chatApp.style.opacity = 1;
-                chatApp.style.pointerEvents = 'auto';
+            // Blur the background canvas
+            gsap.to('#canvas-container', { filter: 'blur(10px)', duration: 1.2, ease: "power2.inOut" });
 
-                const maxDist = Math.max(
-                    Math.hypot(x, y), Math.hypot(window.innerWidth - x, y),
-                    Math.hypot(x, window.innerHeight - y), Math.hypot(window.innerWidth - x, window.innerHeight - y)
-                );
-
-                // Blur the background canvas
-                gsap.to('#canvas-container', { filter: 'blur(10px)', duration: 1.2, ease: "power2.inOut" });
-
-                gsap.fromTo(chatApp,
-                    { clipPath: `circle(0px at ${x}px ${y}px)` },
-                    {
-                        clipPath: `circle(${maxDist}px at ${x}px ${y}px)`,
-                        duration: 1.2,
-                        ease: "power3.inOut",
-                        onComplete: async () => {
-                            landingPage.style.display = 'none';
-                            chatApp.style.clipPath = 'none';
-                            chatInput.focus();
-                            await loadGroupsAndHistory(); // Connects to server and loads history
-                        }
+            gsap.fromTo(chatApp,
+                { clipPath: `circle(0px at ${x}px ${y}px)` },
+                {
+                    clipPath: `circle(${maxDist}px at ${x}px ${y}px)`,
+                    duration: 1.2,
+                    ease: "power3.inOut",
+                    onComplete: async () => {
+                        landingPage.style.display = 'none';
+                        chatApp.style.clipPath = 'none';
+                        chatInput.focus();
+                        await loadGroupsAndHistory(); // Connects to server and loads history
                     }
-                );
-                gsap.from("#chat-app > nav > div", { scale: 0, opacity: 0, duration: 0.5, stagger: 0.1, delay: 0.4, ease: "back.out(1.5)" });
-                gsap.from("#chat-app > div.w-60 > div > *", { x: -20, opacity: 0, duration: 0.4, stagger: 0.05, delay: 0.6 });
-            }
+                }
+            );
+            gsap.from("#chat-app > nav > div", { scale: 0, opacity: 0, duration: 0.5, stagger: 0.1, delay: 0.4, ease: "back.out(1.5)" });
+            gsap.from("#chat-app > div.w-60 > div > *", { x: -20, opacity: 0, duration: 0.4, stagger: 0.05, delay: 0.6 });
+        }
 
-            async function loadGroupsAndHistory() {
-                try {
-                    const res = await fetch('/api/groups');
-                    const groups = await res.json();
+        async function loadGroupsAndHistory() {
+            try {
+                const res = await fetch('/api/groups');
+                const groups = await res.json();
 
-                    const container = document.getElementById('dynamic-groups-container');
-                    container.innerHTML = '';
+                const container = document.getElementById('dynamic-groups-container');
+                container.innerHTML = '';
 
-                    if (groups.length > 0) {
-                        groups.forEach((g, idx) => {
-                            const abbr = g.name.substring(0, 2).toUpperCase();
-                            const isActive = idx === 0;
-                            const el = document.createElement('div');
-                            el.className = 'relative group w-full flex justify-center';
-                            el.innerHTML = `
+                if (groups.length > 0) {
+                    groups.forEach((g, idx) => {
+                        const abbr = g.name.substring(0, 2).toUpperCase();
+                        const isActive = idx === 0;
+                        const el = document.createElement('div');
+                        el.className = 'relative group w-full flex justify-center';
+                        el.innerHTML = `
                             <div class="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full transition-all duration-300 indicator ${isActive ? 'scale-100' : 'scale-0 group-hover:scale-100'}"></div>
                             <div title="${escapeHtml(g.name)}" onclick="switchGroup('${g.id}', '${escapeHtml(g.name)}', this)" class="w-12 h-12 rounded-[${isActive ? '16px' : '24px'}] hover:rounded-[16px] ${isActive ? 'bg-gradient-to-br from-[#ff0ade] to-[#ea3e9a] shadow-[0_4px_16px_rgba(234,62,154,0.4)]' : 'bg-white/10 border border-white/20'} flex items-center justify-center cursor-pointer transition-all duration-300 relative group-icon">
                                 <span class="font-bold text-lg">${escapeHtml(abbr)}</span>
                             </div>
                         `;
-                            container.appendChild(el);
-                        });
+                        container.appendChild(el);
+                    });
 
-                        // Default switch to the first group
-                        await switchGroup(groups[0].id, groups[0].name, container.firstElementChild.querySelector('.group-icon'), true);
-                    } else {
-                        // Fallback
-                        await switchGroup('1', 'general', null, true);
-                    }
-                } catch (err) {
-                    console.error("Error loading groups:", err);
+                    // Default switch to the first group
+                    await switchGroup(groups[0].id, groups[0].name, container.firstElementChild.querySelector('.group-icon'), true);
+                } else {
+                    // Fallback
+                    await switchGroup('1', 'general', null, true);
                 }
+            } catch (err) {
+                console.error("Error loading groups:", err);
+            }
+        }
+
+        async function switchGroup(groupId, groupName, element, isInitial = false) {
+            // Update UI Sidebar selection
+            if (element) {
+                document.querySelectorAll('#dynamic-groups-container .indicator').forEach(el => {
+                    el.classList.remove('scale-100');
+                    el.classList.add('scale-0');
+                });
+                document.querySelectorAll('#dynamic-groups-container .group-icon').forEach(el => {
+                    el.className = "w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-white/10 border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 relative group-icon";
+                });
+
+                element.className = "w-12 h-12 rounded-[16px] bg-gradient-to-br from-[#ff0ade] to-[#ea3e9a] shadow-[0_4px_16px_rgba(234,62,154,0.4)] flex items-center justify-center cursor-pointer transition-all duration-300 relative group-icon";
+                element.previousElementSibling.classList.remove('scale-0');
+                element.previousElementSibling.classList.add('scale-100');
             }
 
-            async function switchGroup(groupId, groupName, element, isInitial = false) {
-                // Update UI Sidebar selection
-                if (element) {
-                    document.querySelectorAll('#dynamic-groups-container .indicator').forEach(el => {
-                        el.classList.remove('scale-100');
-                        el.classList.add('scale-0');
-                    });
-                    document.querySelectorAll('#dynamic-groups-container .group-icon').forEach(el => {
-                        el.className = "w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-white/10 border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 relative group-icon";
-                    });
+            document.getElementById('current-group-name').textContent = groupName;
+            document.getElementById('chat-header-name').textContent = groupName;
+            chatInput.placeholder = `Message #${groupName}...`;
 
-                    element.className = "w-12 h-12 rounded-[16px] bg-gradient-to-br from-[#ff0ade] to-[#ea3e9a] shadow-[0_4px_16px_rgba(234,62,154,0.4)] flex items-center justify-center cursor-pointer transition-all duration-300 relative group-icon";
-                    element.previousElementSibling.classList.remove('scale-0');
-                    element.previousElementSibling.classList.add('scale-100');
-                }
+            msgsContainer.innerHTML = '<div class="mt-auto"></div>'; // Clear existing chat
+            activeGroupId = String(groupId);
 
-                document.getElementById('current-group-name').textContent = groupName;
-                document.getElementById('chat-header-name').textContent = groupName;
-                chatInput.placeholder = `Message #${groupName}...`;
-
-                msgsContainer.innerHTML = '<div class="mt-auto"></div>'; // Clear existing chat
-                activeGroupId = String(groupId);
-
-                // Reconnect Socket if switching rooms manually
-                if (!isInitial && socket) {
-                    socket.emit('joinGroup', { userId: currentUser.id, groupId: activeGroupId });
-                }
-
-                // Fetch chat history from DB
-                try {
-                    const res = await fetch(`/api/chat/messages/${groupId}`);
-                    const messages = await res.json();
-                    messages.forEach(m => {
-                        const isMe = m.userId === currentUser.id;
-                        appendMessage(m.content, m.username, isMe, m.profilePicUrl, m.createdAt, m.role);
-                    });
-                } catch (err) {
-                    console.error("Error fetching history:", err);
-                }
-
-                if (isInitial) {
-                    initSocket();
-                }
-
-                // Auto close mobile drawer when switching group
-                if (window.innerWidth < 768) {
-                    const drawer = document.getElementById('sidebar-drawer');
-                    if (!drawer.classList.contains('-translate-x-full')) toggleMobileMenu();
-                }
+            // Reconnect Socket if switching rooms manually
+            if (!isInitial && socket) {
+                socket.emit('joinGroup', { userId: currentUser.id, groupId: activeGroupId });
             }
 
-
-            // -------------------------
-            // SOCKET.IO & CHAT LOGIC
-            // -------------------------
-            let isSocketInitialized = false;
-
-            function initSocket() {
-                if (isSocketInitialized) return;
-                isSocketInitialized = true;
-
-                socket = io();
-
-                socket.on('connect', () => {
-                    socket.emit('joinGroup', { userId: currentUser.id, groupId: activeGroupId });
+            // Fetch chat history from DB
+            try {
+                const res = await fetch(`/api/chat/messages/${groupId}`);
+                const messages = await res.json();
+                messages.forEach(m => {
+                    const isMe = m.userId === currentUser.id;
+                    appendMessage(m.content, m.username, isMe, m.profilePicUrl, m.createdAt, m.role);
                 });
+            } catch (err) {
+                console.error("Error fetching history:", err);
+            }
 
-                // Chat Input
-                chatInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && chatInput.value.trim() !== '') {
-                        const text = chatInput.value.trim();
-                        chatInput.value = '';
+            if (isInitial) {
+                initSocket();
+            }
 
-                        const inputWrap = chatInput.parentElement;
-                        gsap.fromTo(inputWrap, { scale: 0.98 }, { scale: 1, duration: 0.2 });
+            // Auto close mobile drawer when switching group
+            if (window.innerWidth < 768) {
+                const drawer = document.getElementById('sidebar-drawer');
+                if (!drawer.classList.contains('-translate-x-full')) toggleMobileMenu();
+            }
+        }
 
-                        socket.emit('sendMessage', {
-                            userId: currentUser.id,
-                            groupId: activeGroupId,
-                            content: text,
-                            username: currentUser.username,
-                            role: currentUser.role
-                        });
-                    }
-                });
 
-                // Incoming Messages
-                socket.on('newMessage', (msgObj) => {
-                    const isMe = msgObj.userId === currentUser.id;
-                    appendMessage(msgObj.content, msgObj.username, isMe, msgObj.profilePicUrl, msgObj.createdAt, msgObj.role);
-                });
+        // -------------------------
+        // SOCKET.IO & CHAT LOGIC
+        // -------------------------
+        let isSocketInitialized = false;
 
-                // Flags / Bans / Penalties
-                socket.on('userFlagged', (data) => {
-                    triggerWarning(data.message);
-                    chatInput.disabled = true;
-                    chatInput.placeholder = "Account restricted. Messages disabled.";
-                    chatInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-red-900/20');
-                });
+        function initSocket() {
+            if (isSocketInitialized) return;
+            isSocketInitialized = true;
 
-                socket.on('messageBlocked', (data) => {
+            socket = io();
+
+            socket.on('connect', () => {
+                socket.emit('joinGroup', { userId: currentUser.id, groupId: activeGroupId });
+            });
+
+            // Chat Input
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                    const text = chatInput.value.trim();
+                    chatInput.value = '';
+
                     const inputWrap = chatInput.parentElement;
-                    gsap.fromTo(inputWrap, { x: -6 }, { x: 6, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set(inputWrap, { x: 0 }) });
-                    triggerWarning(data.reason);
-                });
+                    gsap.fromTo(inputWrap, { scale: 0.98 }, { scale: 1, duration: 0.2 });
+
+                    socket.emit('sendMessage', {
+                        userId: currentUser.id,
+                        groupId: activeGroupId,
+                        content: text,
+                        username: currentUser.username,
+                        role: currentUser.role
+                    });
+                }
+            });
+
+            // Incoming Messages
+            socket.on('newMessage', (msgObj) => {
+                const isMe = msgObj.userId === currentUser.id;
+                appendMessage(msgObj.content, msgObj.username, isMe, msgObj.profilePicUrl, msgObj.createdAt, msgObj.role);
+            });
+
+            // Flags / Bans / Penalties
+            socket.on('userFlagged', (data) => {
+                triggerWarning(data.message);
+                chatInput.disabled = true;
+                chatInput.placeholder = "Account restricted. Messages disabled.";
+                chatInput.classList.add('opacity-50', 'cursor-not-allowed', 'bg-red-900/20');
+            });
+
+            socket.on('messageBlocked', (data) => {
+                const inputWrap = chatInput.parentElement;
+                gsap.fromTo(inputWrap, { x: -6 }, { x: 6, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.set(inputWrap, { x: 0 }) });
+                triggerWarning(data.reason);
+            });
+        }
+
+        function appendMessage(text, username, isMe, avatarUrl = null, timestamp = null, role = 'student') {
+            const timeStr = timestamp
+                ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const userColor = isMe ? '#c8046d' : '#7cff67';
+
+            let avatarSrc = avatarUrl;
+            if (!avatarSrc) {
+                avatarSrc = isMe ? (currentUser.profile_pic_url || 'https://i.pravatar.cc/150?u=fallback') : `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`;
             }
 
-            function appendMessage(text, username, isMe, avatarUrl = null, timestamp = null, role = 'student') {
-                const timeStr = timestamp
-                    ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const RoleBadge = (role === 'admin' || role === 'teacher')
+                ? `<span class="bg-[#ea3e9a] text-white text-[9px] px-1.5 py-0.5 rounded ml-2 uppercase tracking-wide font-extrabold shadow-[0_0_10px_rgba(234,62,154,0.5)]">Admin</span>`
+                : '';
 
-                const userColor = isMe ? '#c8046d' : '#7cff67';
-
-                let avatarSrc = avatarUrl;
-                if (!avatarSrc) {
-                    avatarSrc = isMe ? (currentUser.profile_pic_url || 'https://i.pravatar.cc/150?u=fallback') : `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`;
-                }
-
-                const RoleBadge = (role === 'admin' || role === 'teacher')
-                    ? `<span class="bg-[#ea3e9a] text-white text-[9px] px-1.5 py-0.5 rounded ml-2 uppercase tracking-wide font-extrabold shadow-[0_0_10px_rgba(234,62,154,0.5)]">Admin</span>`
-                    : '';
-
-                const msgHtml = `
+            const msgHtml = `
                 <div class="flex gap-4 p-2 pl-3 hover:bg-black/30 rounded-lg transition-colors group msg-node fade-in">
                     <img src="${avatarSrc}" class="w-10 h-10 rounded-full flex-shrink-0 shadow-md border border-white/20 object-cover bg-white/5">
                     <div>
@@ -746,109 +747,109 @@
                     </div>
                 </div>
             `;
-                const div = document.createElement('div');
-                div.innerHTML = msgHtml;
-                msgsContainer.appendChild(div.firstElementChild);
-                msgsContainer.scrollTop = msgsContainer.scrollHeight;
+            const div = document.createElement('div');
+            div.innerHTML = msgHtml;
+            msgsContainer.appendChild(div.firstElementChild);
+            msgsContainer.scrollTop = msgsContainer.scrollHeight;
+        }
+
+        // -------------------------
+        // WARNING MODAL
+        // -------------------------
+        const warningModal = document.getElementById('warning-modal');
+        const warningReason = document.getElementById('warning-reason');
+
+        function triggerWarning(reason) {
+            warningReason.textContent = reason;
+            gsap.killTweensOf(warningModal);
+            gsap.fromTo(warningModal,
+                { y: 60, autoAlpha: 0, scale: 0.95 },
+                { y: 0, autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(1.2)" }
+            );
+            gsap.to(warningModal, { y: 30, autoAlpha: 0, duration: 0.4, delay: 6, ease: "power2.in" });
+        }
+        document.getElementById('close-warning').addEventListener('click', () => {
+            gsap.to(warningModal, { y: 30, autoAlpha: 0, duration: 0.3, ease: "power2.in" });
+        });
+
+        // -------------------------
+        // EMOJI PICKER
+        // -------------------------
+        const emojiPicker = document.getElementById('emoji-picker');
+        const emojiBtn = document.getElementById('btn-emoji');
+        const emojiGrid = document.getElementById('emoji-grid');
+        const emojis = ['👍', '👎', '❤️', '🔥', '😂', '🥺', '✨', '🎉', '🚀', '🤔', '👀', '💯', '🙌', '👏', '✅', '❌', '💡', '🤓', '💻', '☕', '⚡', '🌟', '🤯', '💀'];
+        emojis.forEach(emoji => {
+            const btn = document.createElement('button');
+            btn.className = 'w-8 h-8 flex items-center justify-center text-xl hover:bg-white/10 rounded-lg transition-colors cursor-pointer';
+            btn.textContent = emoji;
+            btn.onclick = () => {
+                chatInput.value += emoji;
+                chatInput.focus();
+                emojiPicker.classList.add('hidden');
+            };
+            emojiGrid.appendChild(btn);
+        });
+        emojiBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            emojiPicker.classList.toggle('hidden');
+            if (!emojiPicker.classList.contains('hidden')) {
+                gsap.fromTo(emojiPicker, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2 });
             }
-
-            // -------------------------
-            // WARNING MODAL
-            // -------------------------
-            const warningModal = document.getElementById('warning-modal');
-            const warningReason = document.getElementById('warning-reason');
-
-            function triggerWarning(reason) {
-                warningReason.textContent = reason;
-                gsap.killTweensOf(warningModal);
-                gsap.fromTo(warningModal,
-                    { y: 60, autoAlpha: 0, scale: 0.95 },
-                    { y: 0, autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(1.2)" }
-                );
-                gsap.to(warningModal, { y: 30, autoAlpha: 0, duration: 0.4, delay: 6, ease: "power2.in" });
+        });
+        document.addEventListener('click', (e) => {
+            if (!emojiPicker.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
+                emojiPicker.classList.add('hidden');
             }
-            document.getElementById('close-warning').addEventListener('click', () => {
-                gsap.to(warningModal, { y: 30, autoAlpha: 0, duration: 0.3, ease: "power2.in" });
+        });
+
+        // -------------------------
+        // UTILS
+        // -------------------------
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        }
+
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        // Combining the user's React Three Fiber wave&dither shader code into vanilla Three.js WebGL2 shader
+        function initDitheredWaves() {
+            const container = document.getElementById('canvas-container');
+            const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false, stencil: false, depth: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+            const mousePos = new THREE.Vector2(0, 0);
+            document.addEventListener('mousemove', (e) => {
+                mousePos.set(e.clientX * renderer.getPixelRatio(), (window.innerHeight - e.clientY) * renderer.getPixelRatio());
             });
 
-            // -------------------------
-            // EMOJI PICKER
-            // -------------------------
-            const emojiPicker = document.getElementById('emoji-picker');
-            const emojiBtn = document.getElementById('btn-emoji');
-            const emojiGrid = document.getElementById('emoji-grid');
-            const emojis = ['👍', '👎', '❤️', '🔥', '😂', '🥺', '✨', '🎉', '🚀', '🤔', '👀', '💯', '🙌', '👏', '✅', '❌', '💡', '🤓', '💻', '☕', '⚡', '🌟', '🤯', '💀'];
-            emojis.forEach(emoji => {
-                const btn = document.createElement('button');
-                btn.className = 'w-8 h-8 flex items-center justify-center text-xl hover:bg-white/10 rounded-lg transition-colors cursor-pointer';
-                btn.textContent = emoji;
-                btn.onclick = () => {
-                    chatInput.value += emoji;
-                    chatInput.focus();
-                    emojiPicker.classList.add('hidden');
-                };
-                emojiGrid.appendChild(btn);
-            });
-            emojiBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                emojiPicker.classList.toggle('hidden');
-                if (!emojiPicker.classList.contains('hidden')) {
-                    gsap.fromTo(emojiPicker, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2 });
-                }
-            });
-            document.addEventListener('click', (e) => {
-                if (!emojiPicker.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
-                    emojiPicker.classList.add('hidden');
-                }
-            });
+            const uniforms = {
+                time: { value: 0 },
+                resolution: { value: new THREE.Vector2(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio()) },
+                waveSpeed: { value: 0.05 },
+                waveFrequency: { value: 3.0 },
+                waveAmplitude: { value: 0.3 },
+                waveColor: { value: new THREE.Color(0.8, 0.1, 0.5) }, // Vibrant purple/pink
+                colorNum: { value: 4.0 },
+                pixelSize: { value: 2.0 },
+                mousePos: { value: mousePos },
+                enableMouseInteraction: { value: 0 }, // Disabled
+                mouseRadius: { value: 1.0 }
+            };
 
-            // -------------------------
-            // UTILS
-            // -------------------------
-            function escapeHtml(str) {
-                return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
-            }
-
-        </script>
-        <script type="module">
-            import * as THREE from 'three';
-            // Combining the user's React Three Fiber wave&dither shader code into vanilla Three.js WebGL2 shader
-            function initDitheredWaves() {
-                const container = document.getElementById('canvas-container');
-                const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false, stencil: false, depth: false });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                container.appendChild(renderer.domElement);
-                const scene = new THREE.Scene();
-                const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-                const mousePos = new THREE.Vector2(0, 0);
-                document.addEventListener('mousemove', (e) => {
-                    mousePos.set(e.clientX * renderer.getPixelRatio(), (window.innerHeight - e.clientY) * renderer.getPixelRatio());
-                });
-
-                const uniforms = {
-                    time: { value: 0 },
-                    resolution: { value: new THREE.Vector2(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio()) },
-                    waveSpeed: { value: 0.05 },
-                    waveFrequency: { value: 3.0 },
-                    waveAmplitude: { value: 0.3 },
-                    waveColor: { value: new THREE.Color(0.8, 0.1, 0.5) }, // Vibrant purple/pink
-                    colorNum: { value: 4.0 },
-                    pixelSize: { value: 2.0 },
-                    mousePos: { value: mousePos },
-                    enableMouseInteraction: { value: 0 }, // Disabled
-                    mouseRadius: { value: 1.0 }
-                };
-
-                const material = new THREE.ShaderMaterial({
-                    glslVersion: THREE.GLSL3,
-                    vertexShader: `
+            const material = new THREE.ShaderMaterial({
+                glslVersion: THREE.GLSL3,
+                vertexShader: `
                     void main() {
                         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     }
                 `,
-                    fragmentShader: `
+                fragmentShader: `
                     uniform vec2 resolution; uniform float time; uniform float waveSpeed;
                     uniform float waveFrequency; uniform float waveAmplitude; uniform vec3 waveColor;
                     uniform float colorNum; uniform float pixelSize;
@@ -941,19 +942,19 @@
                         fragColor = vec4(col, 1.0);
                     }
                 `,
-                    uniforms: uniforms
-                });
-                scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
-                const clock = new THREE.Clock();
-                window.addEventListener('resize', () => {
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                    uniforms.resolution.value.set(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
-                });
-                function render() { requestAnimationFrame(render); uniforms.time.value = clock.getElapsedTime(); renderer.render(scene, camera); }
-                render();
-            }
-            initDitheredWaves();
-        </script>
+                uniforms: uniforms
+            });
+            scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+            const clock = new THREE.Clock();
+            window.addEventListener('resize', () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                uniforms.resolution.value.set(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
+            });
+            function render() { requestAnimationFrame(render); uniforms.time.value = clock.getElapsedTime(); renderer.render(scene, camera); }
+            render();
+        }
+        initDitheredWaves();
+    </script>
 </body>
 
 </html>
