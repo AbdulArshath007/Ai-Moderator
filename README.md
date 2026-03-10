@@ -454,21 +454,6 @@ After running `node db_init.js`, the following admin account is seeded:
 
 > Students can register through the "Create Account" page.
 
----
-
-## 📸 Screenshots
-
-### Landing Page
-> Premium glassmorphism login with Three.js animated background
-
-### Chat Interface (Student View)
-> Discord-inspired layout with real-time messaging and AI moderation
-
-### Admin Dashboard (Teacher View)
-> Comprehensive dashboard with stats, user management, group management, and violation logs
-
-### AI Moderation in Action
-> Blocked message with educational warning modal
 
 ---
 
