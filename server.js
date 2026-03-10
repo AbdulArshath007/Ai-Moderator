@@ -34,7 +34,7 @@ app.get('/api/chat/messages/:groupId', async (req, res) => {
     try {
         const { groupId } = req.params;
         const result = await pool.query(`
-            SELECT m.id, m.content, m.created_at as "createdAt", u.username, u.profile_pic_url as "profilePicUrl", m.user_id as "userId"
+            SELECT m.id, m.content, m.created_at as "createdAt", u.username, u.profile_pic_url as "profilePicUrl", m.user_id as "userId", u.role
             FROM messages m
             JOIN users u ON m.user_id = u.id
             WHERE m.group_id = $1
@@ -121,13 +121,18 @@ io.on('connection', (socket) => {
                     [userId, groupId, content]
                 );
 
+                // Fetch real role before broadcasting
+                const roleQuery = await pool.query('SELECT role FROM users WHERE id = $1', [userId]);
+                const senderRole = roleQuery.rows[0]?.role || 'student';
+
                 io.to(roomId).emit('newMessage', {
                     id: insertMsg.rows[0].id,
                     userId,
                     username,
                     groupId,
                     content,
-                    createdAt: insertMsg.rows[0].created_at
+                    createdAt: insertMsg.rows[0].created_at,
+                    role: senderRole
                 });
 
             } else {

@@ -613,7 +613,7 @@
                 const messages = await res.json();
                 messages.forEach(m => {
                     const isMe = m.userId === currentUser.id;
-                    appendMessage(m.content, m.username, isMe, m.profilePicUrl, m.createdAt);
+                    appendMessage(m.content, m.username, isMe, m.profilePicUrl, m.createdAt, m.role);
                 });
             } catch (err) {
                 console.error("Error fetching history:", err);
@@ -653,7 +653,8 @@
                         userId: currentUser.id,
                         groupId: activeGroupId,
                         content: text,
-                        username: currentUser.username
+                        username: currentUser.username,
+                        role: currentUser.role
                     });
                 }
             });
@@ -661,7 +662,7 @@
             // Incoming Messages
             socket.on('newMessage', (msgObj) => {
                 const isMe = msgObj.userId === currentUser.id;
-                appendMessage(msgObj.content, msgObj.username, isMe, msgObj.profilePicUrl);
+                appendMessage(msgObj.content, msgObj.username, isMe, msgObj.profilePicUrl, msgObj.createdAt, msgObj.role);
             });
 
             // Flags / Bans / Penalties
@@ -679,7 +680,7 @@
             });
         }
 
-        function appendMessage(text, username, isMe, avatarUrl = null, timestamp = null) {
+        function appendMessage(text, username, isMe, avatarUrl = null, timestamp = null, role = 'student') {
             const timeStr = timestamp
                 ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -691,12 +692,17 @@
                 avatarSrc = isMe ? (currentUser.profile_pic_url || 'https://i.pravatar.cc/150?u=fallback') : `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`;
             }
 
+            const RoleBadge = (role === 'admin' || role === 'teacher')
+                ? `<span class="bg-[#ea3e9a] text-white text-[9px] px-1.5 py-0.5 rounded ml-2 uppercase tracking-wide font-extrabold shadow-[0_0_10px_rgba(234,62,154,0.5)]">Admin</span>`
+                : '';
+
             const msgHtml = `
                 <div class="flex gap-4 p-2 pl-3 hover:bg-black/30 rounded-lg transition-colors group msg-node fade-in">
                     <img src="${avatarSrc}" class="w-10 h-10 rounded-full flex-shrink-0 shadow-md border border-white/20 object-cover bg-white/5">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-semibold text-[${userColor}]">${escapeHtml(username)}</span>
+                            ${RoleBadge}
                             <span class="text-[10px] text-gray-500">${timeStr}</span>
                         </div>
                         <p class="text-gray-200 mt-0.5 text-sm leading-relaxed">${escapeHtml(text)}</p>
