@@ -176,7 +176,7 @@
         <div class="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-6">
 
             <!-- Stats Row -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="stats-row">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4" id="stats-row">
                 <div class="stat-card rounded-xl p-4 flex flex-col gap-1">
                     <div class="text-[11px] text-gray-500 uppercase tracking-wider font-semibold">Users</div>
                     <div class="text-2xl font-extrabold" id="stat-users">-</div>
@@ -200,21 +200,26 @@
             </div>
 
             <!-- Tab Navigation -->
-            <div class="flex gap-2">
-                <button onclick="switchTab('flagged')" id="tab-flagged"
-                    class="tab-active glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border flex items-center gap-1.5">
+            <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist"
+                aria-label="Admin Navigation Tabs">
+                <button onclick="switchTab('flagged')" id="tab-flagged" role="tab" aria-selected="true"
+                    aria-controls="panel-flagged"
+                    class="tab-active glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border flex items-center gap-1.5 whitespace-nowrap">
                     <i class="ph-fill ph-warning"></i> Flagged Users
                 </button>
-                <button onclick="switchTab('groups')" id="tab-groups"
-                    class="glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-white/10 text-gray-400 flex items-center gap-1.5">
+                <button onclick="switchTab('groups')" id="tab-groups" role="tab" aria-selected="false"
+                    aria-controls="panel-groups"
+                    class="glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-white/10 text-gray-400 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="ph ph-folders"></i> Groups
                 </button>
-                <button onclick="switchTab('boundaries')" id="tab-boundaries"
-                    class="glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-white/10 text-gray-400 flex items-center gap-1.5">
+                <button onclick="switchTab('boundaries')" id="tab-boundaries" role="tab" aria-selected="false"
+                    aria-controls="panel-boundaries"
+                    class="glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-white/10 text-gray-400 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="ph ph-shield-check"></i> Boundaries
                 </button>
-                <button onclick="switchTab('violations')" id="tab-violations"
-                    class="glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-white/10 text-gray-400 flex items-center gap-1.5">
+                <button onclick="switchTab('violations')" id="tab-violations" role="tab" aria-selected="false"
+                    aria-controls="panel-violations"
+                    class="glass-btn px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer border border-white/10 text-gray-400 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="ph ph-list-bullets"></i> Violation Log
                 </button>
             </div>
@@ -222,7 +227,8 @@
             <!-- TAB CONTENT -->
 
             <!-- Flagged Users Tab -->
-            <div id="panel-flagged" class="glass-card rounded-2xl p-6 fade-in">
+            <div id="panel-flagged" role="tabpanel" aria-labelledby="tab-flagged"
+                class="glass-card rounded-2xl p-4 md:p-6 fade-in overflow-x-auto">
                 <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="ph-fill ph-warning text-red-400"></i> Flagged Users
                 </h2>
@@ -232,7 +238,8 @@
             </div>
 
             <!-- Groups Tab -->
-            <div id="panel-groups" class="glass-card rounded-2xl p-6 fade-in hidden">
+            <div id="panel-groups" role="tabpanel" aria-labelledby="tab-groups"
+                class="glass-card rounded-2xl p-4 md:p-6 fade-in hidden overflow-x-auto">
                 <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="ph ph-folders text-[#ea3e9a]"></i> Group Management
                 </h2>
@@ -250,7 +257,8 @@
             </div>
 
             <!-- Boundaries Tab -->
-            <div id="panel-boundaries" class="glass-card rounded-2xl p-6 fade-in hidden">
+            <div id="panel-boundaries" role="tabpanel" aria-labelledby="tab-boundaries"
+                class="glass-card rounded-2xl p-4 md:p-6 fade-in hidden overflow-x-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Generic Boundaries -->
                     <div>
@@ -286,7 +294,8 @@
             </div>
 
             <!-- Violations Log Tab -->
-            <div id="panel-violations" class="glass-card rounded-2xl p-6 fade-in hidden">
+            <div id="panel-violations" role="tabpanel" aria-labelledby="tab-violations"
+                class="glass-card rounded-2xl p-4 md:p-6 fade-in hidden overflow-x-auto">
                 <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="ph ph-list-bullets text-orange-400"></i> Recent Violations
                 </h2>
@@ -336,13 +345,23 @@
         // ========================
         function switchTab(name) {
             ['flagged', 'groups', 'boundaries', 'violations'].forEach(t => {
-                document.getElementById(`panel-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('tab-active');
-                document.getElementById(`tab-${t}`).classList.add('text-gray-400', 'border-white/10');
+                const panel = document.getElementById(`panel-${t}`);
+                const tab = document.getElementById(`tab-${t}`);
+                if (panel && tab) {
+                    panel.classList.add('hidden');
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('text-gray-400', 'border-white/10');
+                    tab.setAttribute('aria-selected', 'false');
+                }
             });
-            document.getElementById(`panel-${name}`).classList.remove('hidden');
-            document.getElementById(`tab-${name}`).classList.add('tab-active');
-            document.getElementById(`tab-${name}`).classList.remove('text-gray-400', 'border-white/10');
+            const activePanel = document.getElementById(`panel-${name}`);
+            const activeTab = document.getElementById(`tab-${name}`);
+            if (activePanel && activeTab) {
+                activePanel.classList.remove('hidden');
+                activeTab.classList.add('tab-active');
+                activeTab.classList.remove('text-gray-400', 'border-white/10');
+                activeTab.setAttribute('aria-selected', 'true');
+            }
         }
 
         // ========================
