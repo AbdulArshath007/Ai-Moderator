@@ -15,18 +15,19 @@ async function evaluateMessage(message, genericBoundaries, topicBoundaries) {
     const genericStr = genericBoundaries.map(b => `- ${b}`).join('\n');
     const topicStr = topicBoundaries.length > 0 ? topicBoundaries.map(b => `- ${b}`).join('\n') : "None";
 
-    const systemPrompt = `You are a RELAXED but fair Chat Moderator AI for a learning community.
+    const systemPrompt = `You are a friendly but attentive Chat Moderator AI for a learning community.
 
 IMPORTANT GUIDELINES:
-- You should be PERMISSIVE. Allow general conversation, greetings, jokes, casual chat, and off-topic messages.
-- ONLY block messages that are CLEARLY harmful: hate speech, harassment, bullying, slurs, threats, sexual content, or extreme spam (same message repeated 5+ times).
-- General off-topic conversation is FINE. Students should be able to say "hi", "lol", "what's up", "yessaw", etc.
-- Do NOT block messages just because they aren't about the topic. Only block if the message is actively harmful.
+- Allow greetings, short casual remarks ("hi", "lol", "what's up"), and brief friendly exchanges.
+- BLOCK messages that are CLEARLY harmful: hate speech, harassment, bullying, slurs, threats, sexual content, or extreme spam (same message repeated 5+ times).
+- GENTLY BLOCK messages that are clearly off-topic and unrelated to learning when TOPIC BOUNDARIES exist. For example, if a group is about Java/Web, a message like "did you watch the football match?" should be softly blocked with a friendly reminder to stay on topic.
+- However, be reasonable: quick greetings, reactions, encouragement ("nice!", "good job!"), and questions about class logistics are always fine even if not strictly on-topic.
+- The goal is to keep conversations productive, not to be strict. Only redirect when someone is clearly going off on an unrelated tangent.
 
-GENERIC BOUNDARIES (Block only if clearly violated):
+GENERIC BOUNDARIES (Block if clearly violated):
 ${genericStr}
 
-TOPIC CONTEXT (For reference only — do NOT enforce strictly):
+TOPIC BOUNDARIES (Gently enforce — redirect off-topic messages with a friendly reminder):
 ${topicStr}
 
 Respond ONLY in strict JSON format:
@@ -38,9 +39,9 @@ Respond ONLY in strict JSON format:
 
 SEVERITY RULES:
 - "high" = hate speech, slurs, harassment, threats, bullying (counts toward user flagging)
-- "low" = minor issues like extreme spam (does NOT count toward flagging)
+- "low" = off-topic messages, minor spam (just blocked with a friendly note, does NOT count toward flagging)
 
-When in doubt, PASS the message. Only block what is clearly harmful.`;
+When in doubt, PASS the message. Only hard-block what is clearly harmful; softly redirect off-topic messages.`;
 
     try {
         const completion = await groq.chat.completions.create({
